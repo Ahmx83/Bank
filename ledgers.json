@@ -4,5 +4,11 @@
     "account_no": 1222,
     "pin": 4444,
     "balance": 5555
+  },
+  "Dima": {
+    "name": "Dima",
+    "account_no": 9999,
+    "pin": 9876,
+    "balance": 7500
   }
 }

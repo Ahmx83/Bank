@@ -1,4 +1,7 @@
-from main import Account
+from bank import Account, Operations
 
-ahmed = Account("Ahmed", 2233, 7620, 1000)
+dima = Account("dima", 9999, 9876, 7500)
 
+x = Operations(dima)
+bal = x.CheckBalance()
+print(bal)
