@@ -73,13 +73,6 @@ def _update_ledger(account:Account) -> None:
         json.dump(customers, fp, indent=2)  # type: ignore
 
 
-def getValidInput(input_, invalid_msg, *expected):
-    """Keeps asking for input until given an expected input."""
-    inp = input("> ")
-    while inp not in expected:
-        print(invalid_msg)
-        inp = input("> ")
-    return input_
 
 
 def generateAccountNumber() -> int:
