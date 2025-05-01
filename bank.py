@@ -12,7 +12,6 @@ class Account:
         self.balance = balance
 
     def __str__(self):
-        cls = type(self).__name__
         return f"""{self.name}'s balance: {self.balance}"""
 
 class NewAccount(Account):
@@ -23,7 +22,7 @@ class NewAccount(Account):
 
 class ExistingAccount(Account):
     def __init__(self, account_no: int, pin: int):
-        customer = readLedgers()[str(account_no)]
+        customer = _readLedgers()[str(account_no)]
         name = customer["name"]
         balance = customer["balance"]
         super().__init__(name, account_no, pin, balance)
@@ -57,32 +56,40 @@ class Operations:
 
 
 # Functions =======================================================================================
-def readLedgers():
+def _readLedgers() -> dict:
     """Returns the contents of '_ledgers.json'"""
     with open("_ledgers.json", "r+") as fp:
         customers = json.load(fp)
     return customers
 
 def _update_ledger(account:Account) -> None:
+    """Updates the details of the given account in '_ledgers.json'."""
     # Gets the current ledgers
-    customers = readLedgers()
+    customers = _readLedgers()
     # Make the change.
     customers[account.account_no] = account.__dict__
     # Updates the ledgers
     with open("_ledgers.json", "w") as fp:
         json.dump(customers, fp, indent=2)  # type: ignore
 
-
-
-
 def generateAccountNumber() -> int:
-    """Generates and returns new and original a 9-digit account number."""
+    """Generates and returns new and original a 9-digit account number,
+    and adds it to 'account_numbers.json'"""
+
+    # Read
     with open("account_numbers.json", "r") as fp:
         account_nums = eval(fp.read())
 
-    acc_no = 0
+    # Generate number
+    acc_no = account_nums[0]
     while acc_no in account_nums:
         acc_no = random.randint(100_000_000, 999_999_999)
+    account_nums.append(acc_no)
+
+    # Write generated number
+    with open("account_numbers.json", "w") as fp:
+        json.dump(account_nums, fp)  # type: ignore
+
     return acc_no
 
 
