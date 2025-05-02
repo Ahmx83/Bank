@@ -1,13 +1,15 @@
 import json
-from typing import Literal
+from typing import Literal, Union
 import random
+
+# TODO: Card() class
 
 # Account Classes =================================================================================
 class Account:
     """Creates a new account"""
     def __init__(self, name: str, account_no: int, pin: int, balance: float):
         self.name = name.capitalize()
-        self.account_no = str(account_no)
+        self.account_no = account_no
         self.pin = pin
         self.balance = balance
 
@@ -92,14 +94,19 @@ def generateAccountNumber() -> int:
 
     return acc_no
 
-
-def checkValidPin(account_no: int,  pin: int) -> Literal[0, 1, 2]:
-    """Returns 1 if account_no doesn't exist, 2 if pin is wrong, 0 if everything matches."""
+def checkValidAccountNo(account_no: int) -> bool:
+    """Returns False if account_no is wrong, True if everything matches."""
     with open("_ledgers.json", "r") as fp:
         customers = json.load(fp)
-    try:
-        acc = customers[str(account_no)]
-    except KeyError:
-        return 1
+
+    return str(account_no) in customers
+
+def checkValidPin(account_no: Union[int|str],  pin: int) -> bool:
+    """Returns False if pin is wrong, True if everything matches."""
+    with open("_ledgers.json", "r") as fp:
+        customers = json.load(fp)
+
+    acc = customers[str(account_no)]
     validPin = acc["pin"]
-    return 0 if pin == validPin else 2
+    return True if pin == validPin else False
+
