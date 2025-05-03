@@ -1,5 +1,5 @@
 from typing import TypeVar
-from bank import checkValidPin, Account, checkValidAccountNo
+from bank import checkPin, Account, checkAccountNo
 
 T = TypeVar('T')
 
@@ -26,7 +26,7 @@ def getAccountNo() -> int:
         account_no = getValidInput("Account numbers are 9 digits. Try again.",
                       9, key=len)
         account_no = int(account_no)
-        valid = checkValidAccountNo(account_no)
+        valid = checkAccountNo(account_no)
         if not valid:
             print("You've entered an invalid account number.")
     return account_no
@@ -40,6 +40,6 @@ def getPin(account_no: int) -> int:
         pin = getValidInput("Pins are 4 digits. Try again.",
                             4, key=len)
         pin = int(pin)
-        valid = checkValidPin(account_no, pin)
+        valid = checkPin(account_no, pin)
         print(valid)
     return pin

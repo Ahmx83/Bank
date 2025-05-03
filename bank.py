@@ -33,6 +33,7 @@ class ExistingAccount(Account):
 
 
 # Transactions ====================================================================================
+# TODO: Overload Operations() with arithmetic operators.
 class Operations:
     """Does different operations on the account given in initiation."""
     def __init__(self, account:Account):
@@ -94,14 +95,14 @@ def generateAccountNumber() -> int:
 
     return acc_no
 
-def checkValidAccountNo(account_no: int) -> bool:
+def checkAccountNo(account_no: int) -> bool:
     """Returns False if account_no is wrong, True if everything matches."""
     with open("_ledgers.json", "r") as fp:
         customers = json.load(fp)
 
     return str(account_no) in customers
 
-def checkValidPin(account_no: Union[int|str],  pin: int) -> bool:
+def checkPin(account_no: Union[int|str],  pin: int) -> bool:
     """Returns False if pin is wrong, True if everything matches."""
     with open("_ledgers.json", "r") as fp:
         customers = json.load(fp)
