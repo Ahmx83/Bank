@@ -95,6 +95,10 @@ def generateAccountNumber() -> int:
 
     return acc_no
 
+def generatePin() -> int:
+    """Returns a random 4-digit number for new accounts."""
+    return random.randint(1000, 9999)
+
 def checkAccountNo(account_no: int) -> bool:
     """Returns False if account_no is wrong, True if everything matches."""
     with open("_ledgers.json", "r") as fp:
