@@ -1,4 +1,5 @@
 import json
+import operator
 from typing import Union
 import random
 
@@ -6,24 +7,28 @@ import random
 # TODO: Card() class
 
 # Account Classes =================================================================================
+# TODO: Account() should be able to deal with invalid input
 class AccountException(Exception):
     """This account module raises this when the module is misused."""
     pass
 
 class Account:
     """Creates a new account"""
-    def __init__(self, name: str, account_no: int, pin: int, balance: float):
-        self.name = name.capitalize()
-        self.account_no = account_no
-        self.pin = pin
-        self._balance = balance
+    def __init__(self, name: str, account_no: int|str,
+                 pin: int|str, balance: float|str):
+        try:
+            self.name = name.capitalize()
+            self.account_no = int(account_no)
+            self.pin = int(pin)
+            self._balance = float(balance)
+        except ValueError:
+            raise AccountException("Invalid data type entered.")
+        except AttributeError:
+            raise AccountException("'name' must be an instance of str.")
 
     @property
     def balance(self):
         return self._balance
-
-    def __str__(self):
-        return f"""{self.name}'s _balance: {self._balance}"""
 
     def withdraw(self, amount:float) -> float:
         """Subtracts the amount from balance and returns the new balance."""
@@ -41,6 +46,45 @@ class Account:
         self._update_ledger()
         return self._balance
 
+    def __str__(self):
+        return f"{self.name}'s balance: ${self._balance:.2f}"
+
+    def __repr__(self):
+        cls = self.__class__.__qualname__
+        return (f"{cls}(name={self.name}, account_no={self.account_no}, "
+                f"pin={'*'*4}, balance={self.balance:.2f})")
+
+    def _comparisonOperatorHelper(self, operator_func, other):
+        """A helper method for our comparison dunder methods"""
+        if isinstance(other, Account):
+            return operator_func(self.balance)
+        elif isinstance(other, (int, float)):
+            return operator_func(self.balance, other)
+        elif operator_func == operator.eq:
+            return False
+        elif operator_func == operator.ne:
+            return True
+        else:
+            return NotImplemented
+
+    def __eq__(self, other):
+        return self._comparisonOperatorHelper(operator.eq, other)
+
+    def __ne__(self, other):
+        return self._comparisonOperatorHelper(operator.ne, other)
+
+    def __gt__(self, other):
+        return self._comparisonOperatorHelper(operator.gt, other)
+
+    def __ge__(self, other):
+        return self._comparisonOperatorHelper(operator.ge, other)
+
+    def __lt__(self, other):
+        return self._comparisonOperatorHelper(operator.lt, other)
+
+    def __le__(self, other):
+        return self._comparisonOperatorHelper(operator.le, other)
+
     @staticmethod
     def _readLedgers() -> dict:
         """Returns the contents of '_ledgers.json'"""
@@ -53,7 +97,9 @@ class Account:
         # Gets the current ledgers
         customers = self._readLedgers()
         # Make the change.
-        customers[str(self.account_no)].update(self.__dict__)
+        customer_data = customers[str(self.account_no)]
+        customer_data.update(self.__dict__)
+
         # Updates the ledgers
         with open("_ledgers.json", "w") as fp:
             json.dump(customers, fp, indent=2)  # type: ignore
