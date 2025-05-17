@@ -1,7 +1,7 @@
 import json
 import operator
-from typing import Union
-import random
+from account_funcs import generateAccountNumber
+
 
 # TODO: combine Account() & Operators()
 # TODO: Card() class
@@ -54,18 +54,32 @@ class Account:
         return (f"{cls}(name={self.name}, account_no={self.account_no}, "
                 f"pin={'*'*4}, balance={self.balance:.2f})")
 
+    # def _comparisonOperatorHelper(self, operator_func, other):
+    #     """A helper method for our comparison dunder methods"""
+    #     if isinstance(other, Account):
+    #         return operator_func(self.balance, other.balance)
+    #     elif isinstance(other, (int, float)):
+    #         return operator_func(self.balance, other)
+    #     elif operator_func == operator.eq:
+    #         return False
+    #     elif operator_func == operator.ne:
+    #         return True
+    #     else:
+    #         return NotImplemented
+
     def _comparisonOperatorHelper(self, operator_func, other):
-        """A helper method for our comparison dunder methods"""
-        if isinstance(other, Account):
-            return operator_func(self.balance)
-        elif isinstance(other, (int, float)):
-            return operator_func(self.balance, other)
-        elif operator_func == operator.eq:
-            return False
-        elif operator_func == operator.ne:
-            return True
-        else:
-            return NotImplemented
+        match other:
+            case Account(balance=other_balance):
+                return operator_func(self.balance, other_balance)
+            case int() | float():
+                return operator_func(self.balance, other)
+            case _:
+                if operator_func == operator.eq:
+                    return False
+                elif operator_func == operator.ne:
+                    return True
+                else:
+                    return NotImplemented
 
     def __eq__(self, other):
         return self._comparisonOperatorHelper(operator.eq, other)
@@ -117,45 +131,3 @@ class ExistingAccount(Account):
         name = customer["name"]
         balance = customer["_balance"]
         super().__init__(name, account_no, pin, balance)
-
-
-# Functions =======================================================================================
-def generateAccountNumber() -> int:
-    """Generates and returns new and original a 9-digit account number,
-    and adds it to 'account_numbers.json'"""
-
-    # Read
-    with open("account_numbers.json", "r") as fp:
-        account_nums = eval(fp.read())
-
-    # Generate number
-    acc_no = account_nums[0]
-    while acc_no in account_nums:
-        acc_no = random.randint(100_000_000, 999_999_999)
-    account_nums.append(acc_no)
-
-    # Write generated number
-    with open("account_numbers.json", "w") as fp:
-        json.dump(account_nums, fp)  # type: ignore
-
-    return acc_no
-
-def generatePin() -> int:
-    """Returns a random 4-digit number for new accounts."""
-    return random.randint(1000, 9999)
-
-def checkAccountNo(account_no: int) -> bool:
-    """Returns False if account_no is wrong, True if everything matches."""
-    with open("_ledgers.json", "r") as fp:
-        customers = json.load(fp)
-
-    return str(account_no) in customers
-
-def checkPin(account_no: Union[int|str],  pin: int) -> bool:
-    """Returns False if pin is wrong, True if everything matches."""
-    with open("_ledgers.json", "r") as fp:
-        customers = json.load(fp)
-
-    acc = customers[str(account_no)]
-    validPin = acc["pin"]
-    return True if pin == validPin else False
