@@ -2,8 +2,6 @@ import json
 import operator
 from account_funcs import generateAccountNumber
 
-
-# TODO: combine Account() & Operators()
 # TODO: Card() class
 
 # Account Classes =================================================================================
@@ -16,15 +14,10 @@ class Account:
     """Creates a new account"""
     def __init__(self, name: str, account_no: int|str,
                  pin: int|str, balance: float|str):
-        try:
-            self.name = name.capitalize()
-            self.account_no = int(account_no)
-            self.pin = int(pin)
-            self._balance = float(balance)
-        except ValueError:
-            raise AccountException("Invalid data type entered.")
-        except AttributeError:
-            raise AccountException("'name' must be an instance of str.")
+        self.name = name.capitalize()
+        self.account_no = int(account_no)
+        self.pin = int(pin)
+        self._balance = float(balance)
 
     @property
     def balance(self):
@@ -98,6 +91,19 @@ class Account:
 
     def __le__(self, other):
         return self._comparisonOperatorHelper(operator.le, other)
+
+    def __add__(self, other):
+        return self._comparisonOperatorHelper(operator.add, other)
+
+    def __sub__(self, other):
+        return self._comparisonOperatorHelper(operator.sub, other)
+
+    def __iadd__(self, other):
+        self._balance = self + other
+        return self
+    def __isub__(self, other):
+        self._balance = self - other
+        return self
 
     @staticmethod
     def _readLedgers() -> dict:
