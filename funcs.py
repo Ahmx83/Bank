@@ -1,8 +1,8 @@
-from typing import TypeVar
-from bank import checkPin, Account, checkAccountNo
+import json
+import random
+from typing import Union
 
-T = TypeVar('T')
-
+# Functions =======================================================================================
 def getValidInput(invalid_msg: str, *expected, key = None) -> str:
     """Keeps asking for input until given an expected input."""
     if key is None:
@@ -18,8 +18,51 @@ def getValidInput(invalid_msg: str, *expected, key = None) -> str:
 
     return user_input
 
+# TODO: make it deal with arrays and .bin files
+def generateAccountNumber() -> int:
+    """Generates and returns new and original a 9-digit account number,
+    and adds it to 'account_numbers.json'"""
+
+    # Read
+    with open("customers data/account_numbers.json", "r") as fp:
+        account_nums = [int(n.strip()) for n in fp if n.strip()]
+
+    # Generate number
+    acc_no = account_nums[0]
+    while acc_no in account_nums:
+        acc_no = random.randint(100_000_000, 999_999_999)
+    account_nums.append(acc_no)
+
+    # Write generated number
+    with open("customers data/account_numbers.json", "a") as fp:
+        fp.write(f'{acc_no}\n')
+
+    return acc_no
+
+def generatePin() -> int:
+    """Returns a random 4-digit number for new accounts."""
+    return random.randint(1000, 9999)
+
+def checkAccountNo(account_no: int) -> bool:
+    """Returns False if account_no is wrong, True if everything matches."""
+    with open("customers data/_ledgers.json", "r") as fp:
+        customers = json.load(fp)
+
+    return str(account_no) in customers
+
+def checkPin(account_no: Union[int|str],  pin: int) -> bool:
+    """Returns False if pin is wrong, True if everything matches."""
+    with open("customers data/_ledgers.json", "r") as fp:
+        customers = json.load(fp)
+
+    acc = customers[str(account_no)]
+    validPin = acc["pin"]
+    return True if pin == validPin else False
+
 def getAccountNo() -> int:
-    """Returns a valid, existing account number."""
+    """Asks user to enter an existing account number.
+    Returns a valid, existing account number."""
+    print("Enter your account number.")
     valid = False
     account_no = 0
     while not valid:
@@ -32,8 +75,9 @@ def getAccountNo() -> int:
     return account_no
 
 def getPin(account_no: int) -> int:
-    """Returns the right pin relative to the account_no given.
-    Assumes the given account_no is valid."""
+    """Asks user to enter the right pin relative to the account_no given.
+    Assumes the given account_no is valid. Returns the valid pin."""
+    print("Enter your pin.")
     valid = 0
     pin = 0
     while not valid:
@@ -41,5 +85,4 @@ def getPin(account_no: int) -> int:
                             4, key=len)
         pin = int(pin)
         valid = checkPin(account_no, pin)
-        print(valid)
     return pin
