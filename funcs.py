@@ -1,6 +1,7 @@
 import json
 import random
 from typing import Union
+from array import array
 
 # Functions =======================================================================================
 def getValidInput(invalid_msg: str, *expected, key = None) -> str:
@@ -18,26 +19,34 @@ def getValidInput(invalid_msg: str, *expected, key = None) -> str:
 
     return user_input
 
-# TODO: make it deal with arrays and .bin files
 def generateAccountNumber() -> int:
-    """Generates and returns new and original a 9-digit account number,
-    and adds it to 'account_numbers.json'"""
+    """Generates and returns a new and original a 9-digit account number
+    and adds it to 'acc_no.bin'"""
 
     # Read
-    with open("customers data/account_numbers.json", "r") as fp:
-        account_nums = [int(n.strip()) for n in fp if n.strip()]
+    arr = readAccBin()
 
     # Generate number
-    acc_no = account_nums[0]
-    while acc_no in account_nums:
+    acc_no = arr[0]
+    while acc_no in arr:
         acc_no = random.randint(100_000_000, 999_999_999)
-    account_nums.append(acc_no)
+    arr.append(acc_no)
 
-    # Write generated number
-    with open("customers data/account_numbers.json", "a") as fp:
-        fp.write(f'{acc_no}\n')
+    # Write a generated number
+    with open("customers_data/acc_no.bin", "wb") as fp:
+        arr.tofile(fp)
 
     return acc_no
+
+def readAccBin() -> array:
+    with open("customers_data/acc_no.bin", "rb") as fp:
+        arr = array("i")
+        while True:
+            try:
+                arr.fromfile(fp, 1)
+            except EOFError:
+                break
+    return arr
 
 def generatePin() -> int:
     """Returns a random 4-digit number for new accounts."""
@@ -45,14 +54,14 @@ def generatePin() -> int:
 
 def checkAccountNo(account_no: int) -> bool:
     """Returns False if account_no is wrong, True if everything matches."""
-    with open("customers data/_ledgers.json", "r") as fp:
+    with open("customers_data/_ledgers.json", "r") as fp:
         customers = json.load(fp)
 
     return str(account_no) in customers
 
 def checkPin(account_no: Union[int|str],  pin: int) -> bool:
-    """Returns False if pin is wrong, True if everything matches."""
-    with open("customers data/_ledgers.json", "r") as fp:
+    """Returns False if the pin is wrong, True if everything matches."""
+    with open("customers_data/_ledgers.json", "r") as fp:
         customers = json.load(fp)
 
     acc = customers[str(account_no)]
